@@ -21,6 +21,18 @@ def create_todo():
     return jsonify(todo), 201
 
 
+@app.route("/todos/<int:todo_id>", methods=["PUT"])
+def update_todo(todo_id):
+    if todo_id not in todos:
+        return jsonify({"error": "todo not found"}), 404
+    data = request.get_json()
+    title = data.get("title")
+    if not title or not title.strip():
+        return jsonify({"error": "title is required"}), 400
+    todos[todo_id]["title"] = title.strip()
+    return jsonify(todos[todo_id]), 200
+
+
 @app.route("/todos/<int:todo_id>", methods=["DELETE"])
 def delete_todo(todo_id):
     todos.pop(todo_id, None)
