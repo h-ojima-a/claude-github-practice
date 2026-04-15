@@ -53,3 +53,21 @@ def test_search_todos_no_results(client):
 def test_search_todos_missing_keyword(client):
     response = client.get("/todos/search")
     assert response.status_code == 400
+
+
+def test_search_todos_empty_keyword(client):
+    client.post("/todos", json={"title": "Buy milk"})
+    response = client.get("/todos/search?keyword=")
+    assert response.status_code == 400
+
+
+def test_search_todos_whitespace_only_keyword(client):
+    client.post("/todos", json={"title": "Buy milk"})
+    response = client.get("/todos/search?keyword=%20%20")
+    assert response.status_code == 400
+
+
+def test_search_todos_empty_list(client):
+    response = client.get("/todos/search?keyword=milk")
+    assert response.status_code == 200
+    assert response.get_json() == []

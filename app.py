@@ -30,9 +30,10 @@ def delete_todo(todo_id):
 @app.route("/todos/search", methods=["GET"])
 def search_todos():
     keyword = request.args.get("keyword")
-    if keyword is None:
+    if not keyword or not keyword.strip():
         return jsonify({"error": "keyword parameter is required"}), 400
-    results = [t for t in todos.values() if keyword.lower() in t["title"].lower()]
+    kw = keyword.strip().lower()
+    results = [t for t in todos.values() if kw in t["title"].lower()]
     return jsonify(results), 200
 
 
