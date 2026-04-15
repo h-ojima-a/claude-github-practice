@@ -25,7 +25,7 @@ def create_todo():
 def update_todo(todo_id):
     if todo_id not in todos:
         return jsonify({"error": "todo not found"}), 404
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     title = data.get("title")
     if not title or not title.strip():
         return jsonify({"error": "title is required"}), 400

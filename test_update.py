@@ -59,3 +59,20 @@ def test_update_todo_strips_whitespace(client):
     response = client.put("/todos/1", json={"title": "  Buy oat milk  "})
     assert response.status_code == 200
     assert response.get_json()["title"] == "Buy oat milk"
+
+
+def test_update_todo_no_body(client):
+    client.post("/todos", json={"title": "Buy milk"})
+
+    response = client.put("/todos/1", content_type="application/json")
+    assert response.status_code == 400
+
+
+def test_update_todo_persists(client):
+    client.post("/todos", json={"title": "Buy milk"})
+    client.put("/todos/1", json={"title": "Buy oat milk"})
+
+    response = client.get("/todos")
+    titles = [t["title"] for t in response.get_json()]
+    assert "Buy oat milk" in titles
+    assert "Buy milk" not in titles
