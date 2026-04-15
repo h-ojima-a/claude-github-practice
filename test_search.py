@@ -71,3 +71,55 @@ def test_search_todos_empty_list(client):
     response = client.get("/todos/search?keyword=milk")
     assert response.status_code == 200
     assert response.get_json() == []
+
+
+def test_search_todos_special_chars_ampersand(client):
+    client.post("/todos", json={"title": "Milk & eggs"})
+    client.post("/todos", json={"title": "Buy milk"})
+
+    response = client.get("/todos/search?keyword=milk+%26+eggs")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Milk & eggs"
+
+
+def test_search_todos_special_chars_slash(client):
+    client.post("/todos", json={"title": "Read React/Vue docs"})
+    client.post("/todos", json={"title": "Buy milk"})
+
+    response = client.get("/todos/search?keyword=React%2FVue")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Read React/Vue docs"
+
+
+def test_search_todos_special_chars_japanese(client):
+    client.post("/todos", json={"title": "牛乳を買う"})
+    client.post("/todos", json={"title": "本を読む"})
+
+    response = client.get("/todos/search?keyword=%E7%89%9B%E4%B9%B3")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 1
+    assert data[0]["title"] == "牛乳を買う"
+
+
+def test_search_todos_special_chars_parentheses(client):
+    client.post("/todos", json={"title": "Fix bug (urgent)"})
+    client.post("/todos", json={"title": "Buy milk"})
+
+    response = client.get("/todos/search?keyword=%28urgent%29")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Fix bug (urgent)"
+
+
+def test_search_todos_special_chars_no_match(client):
+    client.post("/todos", json={"title": "Buy milk"})
+
+    response = client.get("/todos/search?keyword=%40nobody")
+    assert response.status_code == 200
+    assert response.get_json() == []
